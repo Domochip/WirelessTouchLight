@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source "D:\\Desktop\\Developpement Materiel\\Arduino\\WirelessTouchLight\\schematic\\WirelessTouchLight.sch")
-    (date "02/10/2019 22:11:06")
+    (date "10/10/2019 21:42:33")
     (tool "Eeschema (5.1.4)-1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -59,7 +59,7 @@
       (tstamp 5D9648C6))
     (comp (ref J1)
       (value Conn_01x04)
-      (footprint Terminal_Blocks:TerminalBlock_bornier-4_P5.08mm)
+      (footprint KF-TerminalBlock:KF235-4P)
       (datasheet ~)
       (libsource (lib Connector_Generic) (part Conn_01x04) (description "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"))
       (sheetpath (names /) (tstamps /))

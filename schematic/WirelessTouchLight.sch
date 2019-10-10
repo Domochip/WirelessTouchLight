@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:WirelessTouchLight-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -256,7 +257,7 @@ U 1 1 5D950FDE
 P 1000 1500
 F 0 "J1" H 918 1817 50  0000 C CNN
 F 1 "Conn_01x04" H 918 1726 50  0000 C CNN
-F 2 "Terminal_Blocks:TerminalBlock_bornier-4_P5.08mm" H 1000 1500 50  0001 C CNN
+F 2 "KF-TerminalBlock:KF235-4P" H 1000 1500 50  0001 C CNN
 F 3 "~" H 1000 1500 50  0001 C CNN
 	1    1000 1500
 	-1   0    0    1   
