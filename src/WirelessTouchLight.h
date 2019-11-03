@@ -70,7 +70,8 @@ private:
   } HomeAutomation;
 
   CapacitiveSensor *m_capaSensor;
-  uint8_t m_samplesNumber = 10;
+  uint8_t m_samplesNumberOff = 10;
+  uint8_t m_samplesNumberOn = 10;
   long m_lastCapaSensorResult = 0;
   unsigned long m_lastTouch = 0;
 

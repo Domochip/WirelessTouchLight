@@ -142,8 +142,8 @@ void TouchLight::mqttCallback(char *topic, uint8_t *payload, unsigned int length
 //Used to initialize configuration properties to default values
 void TouchLight::SetConfigDefaultValues()
 {
-
-  m_samplesNumber = 10;
+  m_samplesNumberOff = 10;
+  m_samplesNumberOn = 10;
 
   m_ha.protocol = HA_PROTO_DISABLED;
   m_ha.hostname[0] = 0;
@@ -158,8 +158,10 @@ void TouchLight::SetConfigDefaultValues()
 //Parse JSON object into configuration properties
 void TouchLight::ParseConfigJSON(DynamicJsonDocument &doc)
 {
-  if (!doc[F("samplesNumber")].isNull())
-    m_samplesNumber = doc[F("samplesNumber")];
+  if (!doc[F("samplesNumberOff")].isNull())
+    m_samplesNumberOff = doc[F("samplesNumberOff")];
+  if (!doc[F("samplesNumberOn")].isNull())
+    m_samplesNumberOn = doc[F("samplesNumberOn")];
 
   if (!doc[F("haproto")].isNull())
     m_ha.protocol = doc[F("haproto")];
@@ -182,9 +184,10 @@ void TouchLight::ParseConfigJSON(DynamicJsonDocument &doc)
 //Parse HTTP POST parameters in request into configuration properties
 bool TouchLight::ParseConfigWebRequest(AsyncWebServerRequest *request)
 {
-
-  if (request->hasParam(F("samplesNumber"), true))
-    m_samplesNumber = request->getParam(F("samplesNumber"), true)->value().toInt();
+  if (request->hasParam(F("samplesNumberOff"), true))
+    m_samplesNumberOff = request->getParam(F("samplesNumberOff"), true)->value().toInt();
+  if (request->hasParam(F("samplesNumberOn"), true))
+    m_samplesNumberOn = request->getParam(F("samplesNumberOn"), true)->value().toInt();
 
   //Parse HA protocol
   if (request->hasParam(F("haproto"), true))
@@ -236,7 +239,8 @@ String TouchLight::GenerateConfigJSON(bool forSaveFile = false)
 {
   String gc('{');
 
-  gc = gc + F("\"samplesNumber\":") + m_samplesNumber;
+  gc = gc + F("\"samplesNumberOff\":") + m_samplesNumberOff;
+  gc = gc + F(",\"samplesNumberOn\":") + m_samplesNumberOn;
 
   gc = gc + F(",\"haproto\":") + m_ha.protocol;
   gc = gc + F(",\"hahost\":\"") + m_ha.hostname + '"';
@@ -423,7 +427,7 @@ void TouchLight::AppRun()
   if (millis() > (m_lastTouch + TOUCH_LATENCY))
   {
     //measure
-    m_lastCapaSensorResult = m_capaSensor->capacitiveSensor(m_samplesNumber);
+    m_lastCapaSensorResult = m_capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? m_samplesNumberOn : m_samplesNumberOff));
     //compare last measure with threshold
     if (m_lastCapaSensorResult > 1000)
     {
