@@ -432,7 +432,7 @@ void TouchLight::AppRun()
     if (m_lastCapaSensorResult > 1000)
     {
       m_lastTouch = millis();
-      //Serial.println("Toggle"); //DEBUG
+      //LOG_SERIAL.println("Touch Toggle"); //DEBUG
       toggle();
     }
   }
@@ -440,17 +440,17 @@ void TouchLight::AppRun()
   if (m_needMqttReconnect)
   {
     m_needMqttReconnect = false;
-    Serial.print(F("MQTT Reconnection : "));
+    LOG_SERIAL.print(F("MQTT Reconnection : "));
     if (mqttConnect())
-      Serial.println(F("OK"));
+      LOG_SERIAL.println(F("OK"));
     else
-      Serial.println(F("Failed"));
+      LOG_SERIAL.println(F("Failed"));
   }
 
   //if MQTT required but not connected and reconnect ticker not started
   if (m_ha.protocol == HA_PROTO_MQTT && !m_mqttClient.connected() && !m_mqttReconnectTicker.active())
   {
-    Serial.println(F("MQTT Disconnected"));
+    LOG_SERIAL.println(F("MQTT Disconnected"));
     //set Ticker to reconnect after 20 or 60 sec (Wifi connected or not)
     m_mqttReconnectTicker.once_scheduled((WiFi.isConnected() ? 20 : 60), [this]() { m_needMqttReconnect = true; m_mqttReconnectTicker.detach(); });
   }
