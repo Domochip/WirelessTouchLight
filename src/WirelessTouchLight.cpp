@@ -123,13 +123,16 @@ void TouchLight::mqttCallback(char *topic, uint8_t *payload, unsigned int length
   switch (payload[0])
   {
   case '0':
+    m_lastTouch = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     off();
     break;
   case '1':
+    m_lastTouch = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     on();
     break;
   case 't':
   case 'T':
+    m_lastTouch = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     toggle();
     break;
   }
