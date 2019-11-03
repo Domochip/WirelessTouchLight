@@ -1,18 +1,47 @@
-<div id="applicationName" style="display: none;">WirelessBase</div>
-<div id="shortApplicationName" style="display: none;">WBase</div>
+<div id="applicationName" style="display: none;">WirelessTouchLight</div>
+<div id="shortApplicationName" style="display: none;">WTouch</div>
 
-<h2 class="content-subhead">WirelessBase<span id="l"><h6 style="display:inline"><b> Loading...</b></h6></span></h2>
-<span id="todo"></span>
+<h2 class="content-subhead">Wireless Touch Light<span id="l"><h6 style="display:inline"><b> Loading...</b></h6></span></h2>
+Light State : <span id="lightState"></span>
+<div id="LightOnOff" class="pure-button-group" role="group" style="display: none;"><style scoped>.pure-button-active{background: rgb(31, 141, 214);}</style>
+    <button id="LightOff" class="pure-button">OFF</button>
+    <button id="LightOn" class="pure-button">ON</button>
+</div><br>
+<h3 class="content-subhead">Home Automation Status</h3>
+<span id="has1"></span><br>
+<span id="has2"></span>
 
 <script>
     //QuerySelector Prefix is added by load function to know into what element queySelector need to look for
     //var qsp = '#content1 ';
+
+    $(qsp+"#LightOff").addEventListener('click',function(evt){
+        get('/setOFF',function(){
+                $(qsp+'#lightOff').classList.add("pure-button-active");
+                $(qsp+'#LightOn').classList.remove("pure-button-active");
+        })
+    });
+
+    $(qsp+"#LightOn").addEventListener('click',function(evt){
+        get('/setON',function(){
+                $(qsp+'#LightOn').classList.add("pure-button-active");
+                $(qsp+'#lightOff').classList.remove("pure-button-active");
+        })
+    });
 
     getJSON("/gs"+qsp[8], 
         function(GS){
             for(k in GS){
                 if((e = $(qsp+'#' + k)) != undefined) e.innerHTML = GS[k];
             }
+
+            if(GS["lightState"]==1){
+                $(qsp+'#LightOn').classList.add("pure-button-active");
+            }
+            else{
+                $(qsp+'#LightOff').classList.add("pure-button-active");
+            }
+
             fadeOut($(qsp+'#l'));
         },
         function(){

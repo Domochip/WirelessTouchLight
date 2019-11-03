@@ -69,28 +69,28 @@ private:
     MQTT mqtt;
   } HomeAutomation;
 
-  CapacitiveSensor *_capaSensor;
-  uint8_t _samplesNumber = 250;
-  long _lastCapaSensorResult = 0;
-  unsigned long _lastTouch = 0;
+  CapacitiveSensor *m_capaSensor;
+  uint8_t m_samplesNumber = 10;
+  long m_lastCapaSensorResult = 0;
+  unsigned long m_lastTouch = 0;
 
-  Event _eventsList[NUMBER_OF_EVENTS];
-  byte _nextEventPos = 0;
+  Event m_eventsList[NUMBER_OF_EVENTS];
+  byte m_nextEventPos = 0;
 
-  HomeAutomation _ha;
-  int _haSendResult = 1;
-  WiFiClient _wifiClient;
+  HomeAutomation m_ha;
+  int m_haSendResult = 1;
+  WiFiClient m_wifiClient;
 
-  PubSubClient _mqttClient;
-  bool _needMqttReconnect = false;
-  Ticker _mqttReconnectTicker;
+  PubSubClient m_mqttClient;
+  bool m_needMqttReconnect = false;
+  Ticker m_mqttReconnectTicker;
 
-  void On();
-  void Off();
-  void Toggle();
+  void on();
+  void off();
+  void toggle();
 
-  bool MqttConnect(bool init = false);
-  void MqttCallback(char *topic, uint8_t *payload, unsigned int length);
+  bool mqttConnect(bool init = false);
+  void mqttCallback(char *topic, uint8_t *payload, unsigned int length);
 
   void SetConfigDefaultValues();
   void ParseConfigJSON(DynamicJsonDocument &doc);

@@ -9,7 +9,7 @@
 #define APPLICATION1_DESC "DomoChip Wireless Touch Light"
 #define APPLICATION1_CLASS TouchLight
 
-#define VERSION_NUMBER "0.9"
+#define VERSION_NUMBER "1.0"
 
 #define DEFAULT_AP_SSID "WirelessTouchLight"
 #define DEFAULT_AP_PSK "PasswordTouchLight"
