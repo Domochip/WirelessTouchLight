@@ -19,11 +19,11 @@ const char appDataPredefPassword[] PROGMEM = "ewcXoCt4HHjZUvY1";
 #include <CapacitiveSensor.h>
 
 //Pin number of send/trigger GPIO
-#define SEND_GPIO 0
+#define SEND_GPIO D6
 //Pin number of receive/sense GPIO
-#define RECEIVE_GPIO 3
+#define RECEIVE_GPIO D5
 //Pin number of relay
-#define RELAY_GPIO 4
+#define RELAY_GPIO D1
 
 //minimum time between 2 touch detection (ms)
 #define TOUCH_LATENCY 1000

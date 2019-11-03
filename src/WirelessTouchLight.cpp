@@ -233,9 +233,6 @@ bool TouchLight::AppInit(bool reInit)
   {
     pinMode(RELAY_GPIO, OUTPUT);
 
-    Serial.end();
-    Serial.begin(SERIAL_SPEED, SERIAL_8N1, SERIAL_TX_ONLY);
-
     _capaSensor = new CapacitiveSensor(SEND_GPIO, RECEIVE_GPIO);
   }
 
