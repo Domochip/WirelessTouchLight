@@ -58,57 +58,41 @@ void TouchLight::toggle()
 
 //------------------------------------------
 // Connect then Subscribe to MQTT
-bool TouchLight::mqttConnect(bool init)
+void TouchLight::mqttConnectedCallback(MQTTMan *mqttMan, bool firstConnection)
 {
-  if (!WiFi.isConnected())
-    return false;
 
-  char sn[9];
-  sprintf_P(sn, PSTR("%08x"), ESP.getChipId());
+  //Subscribe to needed topic
+  //prepare topic subscription
+  String subscribeTopic = m_ha.mqtt.generic.baseTopic;
+  //check for final slash
+  if (subscribeTopic.length() && subscribeTopic.charAt(subscribeTopic.length() - 1) != '/')
+    subscribeTopic += '/';
 
-  //generate clientID
-  String clientID(F(APPLICATION1_NAME));
-  clientID += sn;
-
-  //Connect
-  if (!m_ha.mqtt.username[0])
-    m_mqttClient.connect(clientID.c_str());
-  else
-    m_mqttClient.connect(clientID.c_str(), m_ha.mqtt.username, m_ha.mqtt.password);
-
-  if (m_mqttClient.connected())
+  //Replace placeholders
+  if (subscribeTopic.indexOf(F("$sn$")) != -1)
   {
-    //Subscribe to needed topic
-    //prepare topic subscription
-    String subscribeTopic = m_ha.mqtt.generic.baseTopic;
-    //check for final slash
-    if (subscribeTopic.length() && subscribeTopic.charAt(subscribeTopic.length() - 1) != '/')
-      subscribeTopic += '/';
-
-    //Replace placeholders
-    if (subscribeTopic.indexOf(F("$sn$")) != -1)
-      subscribeTopic.replace(F("$sn$"), sn);
-
-    if (subscribeTopic.indexOf(F("$mac$")) != -1)
-      subscribeTopic.replace(F("$mac$"), WiFi.macAddress());
-
-    if (subscribeTopic.indexOf(F("$model$")) != -1)
-      subscribeTopic.replace(F("$model$"), APPLICATION1_NAME);
-
-    switch (m_ha.mqtt.type) //switch on MQTT type
-    {
-    case HA_MQTT_GENERIC: // mytopic/command
-      subscribeTopic += F("command");
-      break;
-    }
-
-    //subscribe topic
-    if (init)
-      m_mqttClient.publish(subscribeTopic.c_str(), ""); //make empty publish only for init
-    m_mqttClient.subscribe(subscribeTopic.c_str());
+    char sn[9];
+    sprintf_P(sn, PSTR("%08x"), ESP.getChipId());
+    subscribeTopic.replace(F("$sn$"), sn);
   }
 
-  return m_mqttClient.connected();
+  if (subscribeTopic.indexOf(F("$mac$")) != -1)
+    subscribeTopic.replace(F("$mac$"), WiFi.macAddress());
+
+  if (subscribeTopic.indexOf(F("$model$")) != -1)
+    subscribeTopic.replace(F("$model$"), APPLICATION1_NAME);
+
+  switch (m_ha.mqtt.type) //switch on MQTT type
+  {
+  case HA_MQTT_GENERIC: // mytopic/command
+    subscribeTopic += F("command");
+    break;
+  }
+
+  //subscribe topic
+  if (init)
+    mqttMan->publish(subscribeTopic.c_str(), ""); //make empty publish only for init
+  mqttMan->subscribe(subscribeTopic.c_str());
 }
 
 //------------------------------------------
@@ -279,7 +263,7 @@ String TouchLight::GenerateStatusJSON()
     break;
   case HA_PROTO_MQTT:
     gs = gs + F("MQTT Connection State : ");
-    switch (m_mqttClient.state())
+    switch (m_mqttMan.state())
     {
     case MQTT_CONNECTION_TIMEOUT:
       gs = gs + F("Timed Out");
@@ -310,7 +294,7 @@ String TouchLight::GenerateStatusJSON()
       break;
     }
 
-    if (m_mqttClient.state() == MQTT_CONNECTED)
+    if (m_mqttMan.state() == MQTT_CONNECTED)
       gs = gs + F("\",\"has2\":\"Last Publish Result : ") + (m_haSendResult ? F("OK") : F("Failed"));
 
     break;
@@ -325,19 +309,19 @@ String TouchLight::GenerateStatusJSON()
 //code to execute during initialization and reinitialization of the app
 bool TouchLight::AppInit(bool reInit)
 {
-  //Stop MQTT Reconnect
-  m_mqttReconnectTicker.detach();
-  if (m_mqttClient.connected()) //Issue #598 : disconnect() crash if client not yet set
-    m_mqttClient.disconnect();
+  //Stop MQTT
+  m_mqttMan.disconnect();
 
   //if MQTT used so configure it
   if (m_ha.protocol == HA_PROTO_MQTT)
   {
-    //setup MQTT client
-    m_mqttClient.setClient(m_wifiClient).setServer(m_ha.hostname, m_ha.mqtt.port).setCallback(std::bind(&TouchLight::mqttCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    //setup MQTT
+    m_mqttMan.setClient(m_wifiClient).setServer(m_ha.hostname, m_ha.mqtt.port);
+    m_mqttMan.setConnectedCallback(std::bind(&TouchLight::mqttConnectedCallback, this, std::placeholders::_1, std::placeholders::_2));
+    m_mqttMan.setCallback(std::bind(&TouchLight::mqttCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
     //Connect
-    mqttConnect(true);
+    m_mqttMan.connect(m_ha.mqtt.username, m_ha.mqtt.password);
   }
 
   m_eventsList[0].lightOn = false;
@@ -437,26 +421,8 @@ void TouchLight::AppRun()
     }
   }
 
-  if (m_needMqttReconnect)
-  {
-    m_needMqttReconnect = false;
-    LOG_SERIAL.print(F("MQTT Reconnection : "));
-    if (mqttConnect())
-      LOG_SERIAL.println(F("OK"));
-    else
-      LOG_SERIAL.println(F("Failed"));
-  }
-
-  //if MQTT required but not connected and reconnect ticker not started
-  if (m_ha.protocol == HA_PROTO_MQTT && !m_mqttClient.connected() && !m_mqttReconnectTicker.active())
-  {
-    LOG_SERIAL.println(F("MQTT Disconnected"));
-    //set Ticker to reconnect after 20 or 60 sec (Wifi connected or not)
-    m_mqttReconnectTicker.once_scheduled((WiFi.isConnected() ? 20 : 60), [this]() { m_needMqttReconnect = true; m_mqttReconnectTicker.detach(); });
-  }
-
   if (m_ha.protocol == HA_PROTO_MQTT)
-    m_mqttClient.loop();
+    m_mqttMan.loop();
 
   //for each events in the list starting by nextEventPos
   for (byte evPos = m_nextEventPos, counter = 0; counter < NUMBER_OF_EVENTS; counter++, evPos = (evPos + 1) % NUMBER_OF_EVENTS)
@@ -474,7 +440,7 @@ void TouchLight::AppRun()
       case HA_PROTO_MQTT:
 
         //if we are connected
-        if (m_mqttClient.connected())
+        if (m_mqttMan.connected())
         {
           //prepare topic
           String completeTopic = m_ha.mqtt.generic.baseTopic;
@@ -505,7 +471,7 @@ void TouchLight::AppRun()
             completeTopic.replace(F("$model$"), APPLICATION1_NAME);
 
           //send
-          if ((m_haSendResult = m_mqttClient.publish(completeTopic.c_str(), m_eventsList[evPos].lightOn ? "1" : "0")))
+          if ((m_haSendResult = m_mqttMan.publish(completeTopic.c_str(), m_eventsList[evPos].lightOn ? "1" : "0")))
             m_eventsList[evPos].sent = true;
         }
 

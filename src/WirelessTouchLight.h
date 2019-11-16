@@ -1,12 +1,9 @@
 #ifndef WirelessTouchLight_h
 #define WirelessTouchLight_h
 
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-
 #include "Main.h"
 #include "base\Utils.h"
+#include "base\MQTTMan.h"
 #include "base\Application.h"
 
 const char appDataPredefPassword[] PROGMEM = "ewcXoCt4HHjZUvY1";
@@ -14,7 +11,6 @@ const char appDataPredefPassword[] PROGMEM = "ewcXoCt4HHjZUvY1";
 #include "data\status1.html.gz.h"
 #include "data\config1.html.gz.h"
 
-#include <PubSubClient.h>
 #include <Ticker.h>
 #include <CapacitiveSensor.h>
 
@@ -82,15 +78,13 @@ private:
   int m_haSendResult = 1;
   WiFiClient m_wifiClient;
 
-  PubSubClient m_mqttClient;
-  bool m_needMqttReconnect = false;
-  Ticker m_mqttReconnectTicker;
+  MQTTMan m_mqttMan;
 
   void on();
   void off();
   void toggle();
 
-  bool mqttConnect(bool init = false);
+  void mqttConnectedCallback(MQTTMan *mqttMan, bool firstConnection);
   void mqttCallback(char *topic, uint8_t *payload, unsigned int length);
 
   void SetConfigDefaultValues();
