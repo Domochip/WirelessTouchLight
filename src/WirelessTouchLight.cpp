@@ -64,23 +64,9 @@ void TouchLight::mqttConnectedCallback(MQTTMan *mqttMan, bool firstConnection)
   //Subscribe to needed topic
   //prepare topic subscription
   String subscribeTopic = m_ha.mqtt.generic.baseTopic;
-  //check for final slash
-  if (subscribeTopic.length() && subscribeTopic.charAt(subscribeTopic.length() - 1) != '/')
-    subscribeTopic += '/';
 
   //Replace placeholders
-  if (subscribeTopic.indexOf(F("$sn$")) != -1)
-  {
-    char sn[9];
-    sprintf_P(sn, PSTR("%08x"), ESP.getChipId());
-    subscribeTopic.replace(F("$sn$"), sn);
-  }
-
-  if (subscribeTopic.indexOf(F("$mac$")) != -1)
-    subscribeTopic.replace(F("$mac$"), WiFi.macAddress());
-
-  if (subscribeTopic.indexOf(F("$model$")) != -1)
-    subscribeTopic.replace(F("$model$"), APPLICATION1_NAME);
+  MQTTMan::prepareTopic(subscribeTopic);
 
   switch (m_ha.mqtt.type) //switch on MQTT type
   {
@@ -90,8 +76,8 @@ void TouchLight::mqttConnectedCallback(MQTTMan *mqttMan, bool firstConnection)
   }
 
   //subscribe topic
-  if (init)
-    mqttMan->publish(subscribeTopic.c_str(), ""); //make empty publish only for init
+  if (firstConnection)
+    mqttMan->publish(subscribeTopic.c_str(), ""); //make empty publish only for firstConnection
   mqttMan->subscribe(subscribeTopic.c_str());
 }
 
@@ -445,9 +431,8 @@ void TouchLight::AppRun()
           //prepare topic
           String completeTopic = m_ha.mqtt.generic.baseTopic;
 
-          //check for final slash
-          if (completeTopic.length() && completeTopic.charAt(completeTopic.length() - 1) != '/')
-            completeTopic += '/';
+          //Replace placeholders
+          MQTTMan::prepareTopic(completeTopic);
 
           switch (m_ha.mqtt.type) //switch on MQTT type
           {
@@ -455,20 +440,6 @@ void TouchLight::AppRun()
             completeTopic += F("status");
             break;
           }
-
-          //prepare sn for placeholder
-          char sn[9];
-          sprintf_P(sn, PSTR("%08x"), ESP.getChipId());
-
-          //Replace placeholders
-          if (completeTopic.indexOf(F("$sn$")) != -1)
-            completeTopic.replace(F("$sn$"), sn);
-
-          if (completeTopic.indexOf(F("$mac$")) != -1)
-            completeTopic.replace(F("$mac$"), WiFi.macAddress());
-
-          if (completeTopic.indexOf(F("$model$")) != -1)
-            completeTopic.replace(F("$model$"), APPLICATION1_NAME);
 
           //send
           if ((m_haSendResult = m_mqttMan.publish(completeTopic.c_str(), m_eventsList[evPos].lightOn ? "1" : "0")))
