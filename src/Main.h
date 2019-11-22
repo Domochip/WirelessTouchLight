@@ -14,6 +14,9 @@
 #define DEFAULT_AP_SSID "WirelessTouchLight"
 #define DEFAULT_AP_PSK "PasswordTouchLight"
 
+//Enable status webpage EventSource
+#define ENABLE_STATUS_EVENTSOURCE 0
+
 //Enable developper mode (SPIFFS editor)
 #define DEVELOPPER_MODE 0
 
