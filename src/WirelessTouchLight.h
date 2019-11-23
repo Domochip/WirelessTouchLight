@@ -65,20 +65,20 @@ private:
     MQTT mqtt;
   } HomeAutomation;
 
-  CapacitiveSensor *m_capaSensor;
-  uint8_t m_samplesNumberOff = 10;
-  uint8_t m_samplesNumberOn = 10;
-  long m_lastCapaSensorResult = 0;
-  unsigned long m_lastTouch = 0;
+  CapacitiveSensor *_capaSensor;
+  uint8_t _samplesNumberOff = 10;
+  uint8_t _samplesNumberOn = 10;
+  long _lastCapaSensorResult = 0;
+  unsigned long _lastTouch = 0;
 
-  Event m_eventsList[NUMBER_OF_EVENTS];
-  byte m_nextEventPos = 0;
+  Event _eventsList[NUMBER_OF_EVENTS];
+  byte _nextEventPos = 0;
 
-  HomeAutomation m_ha;
-  int m_haSendResult = 1;
-  WiFiClient m_wifiClient;
+  HomeAutomation _ha;
+  int _haSendResult = 1;
+  WiFiClient _wifiClient;
 
-  MQTTMan m_mqttMan;
+  MQTTMan _mqttMan;
 
   void on();
   void off();
@@ -87,16 +87,16 @@ private:
   void mqttConnectedCallback(MQTTMan *mqttMan, bool firstConnection);
   void mqttCallback(char *topic, uint8_t *payload, unsigned int length);
 
-  void SetConfigDefaultValues();
-  void ParseConfigJSON(DynamicJsonDocument &doc);
-  bool ParseConfigWebRequest(AsyncWebServerRequest *request);
-  String GenerateConfigJSON(bool forSaveFile);
-  String GenerateStatusJSON();
-  bool AppInit(bool reInit);
-  const uint8_t *GetHTMLContent(WebPageForPlaceHolder wp);
-  size_t GetHTMLContentSize(WebPageForPlaceHolder wp);
-  void AppInitWebServer(AsyncWebServer &server, bool &shouldReboot, bool &pauseApplication);
-  void AppRun();
+  void setConfigDefaultValues();
+  void parseConfigJSON(DynamicJsonDocument &doc);
+  bool parseConfigWebRequest(AsyncWebServerRequest *request);
+  String generateConfigJSON(bool forSaveFile);
+  String generateStatusJSON();
+  bool appInit(bool reInit);
+  const uint8_t *getHTMLContent(WebPageForPlaceHolder wp);
+  size_t getHTMLContentSize(WebPageForPlaceHolder wp);
+  void appInitWebServer(AsyncWebServer &server, bool &shouldReboot, bool &pauseApplication);
+  void appRun();
 
 public:
   TouchLight(char appId, String fileName);
