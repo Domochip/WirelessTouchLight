@@ -251,6 +251,8 @@ String TouchLight::generateStatusJSON()
 
   gs = gs + F("\"lightState\":") + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0);
 
+  gs = gs + F(",\"lcsr\":") + _lastCapaSensorResult;
+
   gs = gs + F(",\"has1\":\"");
   switch (_ha.protocol)
   {
