@@ -9,6 +9,9 @@ void TouchLight::on()
     //apply change to output
     digitalWrite(RELAY_GPIO, HIGH);
 
+    //Log
+    LOG_SERIAL.println(F("Light On"));
+
     //increment nextEventPos to prevent problem if interrupt occurs
     _nextEventPos = (_nextEventPos + 1) % NUMBER_OF_EVENTS;
 
@@ -29,6 +32,9 @@ void TouchLight::off()
     //apply change to output
     digitalWrite(RELAY_GPIO, LOW);
 
+    //Log
+    LOG_SERIAL.println(F("Light Off"));
+
     //increment nextEventPos to prevent problem if interrupt occurs
     _nextEventPos = (_nextEventPos + 1) % NUMBER_OF_EVENTS;
 
@@ -44,6 +50,9 @@ void TouchLight::toggle()
 {
   //invert output
   digitalWrite(RELAY_GPIO, digitalRead(RELAY_GPIO) == HIGH ? LOW : HIGH);
+
+  //Log
+  LOG_SERIAL.println(F("Light Toggle"));
 
   //increment nextEventPos to prevent problem if interrupt occurs
   _nextEventPos = (_nextEventPos + 1) % NUMBER_OF_EVENTS;
