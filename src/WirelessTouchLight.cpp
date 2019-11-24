@@ -102,16 +102,16 @@ void TouchLight::mqttCallback(char *topic, uint8_t *payload, unsigned int length
   switch (payload[0])
   {
   case '0':
-    _lastTouch = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
+    _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     off();
     break;
   case '1':
-    _lastTouch = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
+    _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     on();
     break;
   case 't':
   case 'T':
-    _lastTouch = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
+    _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     toggle();
     break;
   }
@@ -123,6 +123,7 @@ void TouchLight::setConfigDefaultValues()
 {
   _samplesNumberOff = 10;
   _samplesNumberOn = 10;
+  _capaSensorThreshold = 15000;
 
   _ha.protocol = HA_PROTO_DISABLED;
   _ha.hostname[0] = 0;
@@ -409,15 +410,18 @@ void TouchLight::appInitWebServer(AsyncWebServer &server, bool &shouldReboot, bo
 void TouchLight::appRun()
 {
   //if touch latency is over
-  if (millis() > (_lastTouch + TOUCH_LATENCY))
+  if (millis() > (_lastTouchMillis + TOUCH_LATENCY))
   {
     //measure
     _lastCapaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
+
+    //DEBUG
+    //LOG_SERIAL.println(_lastCapaSensorResult);
+
     //compare last measure with threshold
-    if (_lastCapaSensorResult > 1000)
+    if (_lastCapaSensorResult > _capaSensorThreshold)
     {
-      _lastTouch = millis();
-      //LOG_SERIAL.println("Touch Toggle"); //DEBUG
+      _lastTouchMillis = millis();
       toggle();
     }
   }

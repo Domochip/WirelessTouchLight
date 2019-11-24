@@ -68,8 +68,9 @@ private:
   CapacitiveSensor *_capaSensor;
   uint8_t _samplesNumberOff = 10;
   uint8_t _samplesNumberOn = 10;
+  long _capaSensorThreshold = 15000;
   long _lastCapaSensorResult = 0;
-  unsigned long _lastTouch = 0;
+  unsigned long _lastTouchMillis = 0;
 
   Event _eventsList[NUMBER_OF_EVENTS];
   byte _nextEventPos = 0;
