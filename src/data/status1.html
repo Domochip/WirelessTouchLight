@@ -2,8 +2,8 @@
 <div id="shortApplicationName" style="display: none;">WTouch</div>
 
 <h2 class="content-subhead">Wireless Touch Light<span id="l"><h6 style="display:inline"><b> Loading...</b></h6></span></h2>
-Light State : <span id="lightState"></span><br>
-Last Capacitive Sensor Result : <span id="lcsr"></span>
+<h3 class="content-subhead">Light Infos<span id="lastRefresh"> (AutoRefresh)</span></h3>
+<dl id="liveData"></dl>
 <div id="LightOnOff" class="pure-button-group" role="group" style="display: none;"><style scoped>.pure-button-active{background: rgb(31, 141, 214);}</style>
     <button id="LightOff" class="pure-button">OFF</button>
     <button id="LightOn" class="pure-button">ON</button>
@@ -16,37 +16,69 @@ Last Capacitive Sensor Result : <span id="lcsr"></span>
     //QuerySelector Prefix is added by load function to know into what element queySelector need to look for
     //var qsp = '#content1 ';
 
-    $(qsp+"#LightOff").addEventListener('click',function(evt){
-        get('/setOFF',function(){
-                $(qsp+'#lightOff').classList.add("pure-button-active");
-                $(qsp+'#LightOn').classList.remove("pure-button-active");
-        })
-    });
-
-    $(qsp+"#LightOn").addEventListener('click',function(evt){
-        get('/setON',function(){
-                $(qsp+'#LightOn').classList.add("pure-button-active");
-                $(qsp+'#lightOff').classList.remove("pure-button-active");
-        })
-    });
-
-    getJSON("/gs"+qsp[8], 
-        function(GS){
-            for(k in GS){
-                if((e = $(qsp+'#' + k)) != undefined) e.innerHTML = GS[k];
-            }
-
-            if(GS["lightState"]==1){
-                $(qsp+'#LightOn').classList.add("pure-button-active");
+    function parseLiveData(liveData){
+        for(k in liveData){
+            kForId=(/[^a-zA-Z]/.test(k[0]) ? 'a' : '')+k; //k[0] is not in a-zA-Z then we need to add 'a'
+            if($(qsp+'#'+kForId) != undefined){
+                var existingElement= $(qsp+'#'+kForId+'Value');
+                if(existingElement.tagName=='INPUT'){
+                    if(existingElement.val!=liveData[k]){
+                        existingElement.val=liveData[k];
+                        existingElement.dispatchEvent(new Event('change'));
+                    }
+                }
+                else{
+                    if(existingElement.innerText!=liveData[k]){
+                        existingElement.innerText=liveData[k];
+                        existingElement.style.fontWeight="bold";
+                    }
+                    else{
+                        existingElement.style.fontWeight="normal";
+                    }
+                }
             }
             else{
-                $(qsp+'#LightOff').classList.add("pure-button-active");
+                var newElement = document.createElement("dd");
+                newElement.id=kForId;
+                newElement.innerHTML=k+' : <span id="'+kForId+'Value">'+liveData[k]+'</span>';
+                $(qsp+'#liveData').appendChild(newElement);
             }
+        }
+    }
 
-            fadeOut($(qsp+'#l'));
+    // $(qsp+"#LightOff").addEventListener('click',function(evt){
+    //     get('/setOFF',function(){
+    //             $(qsp+'#lightOff').classList.add("pure-button-active");
+    //             $(qsp+'#LightOn').classList.remove("pure-button-active");
+    //     })
+    // });
+
+    // $(qsp+"#LightOn").addEventListener('click',function(evt){
+    //     get('/setON',function(){
+    //             $(qsp+'#LightOn').classList.add("pure-button-active");
+    //             $(qsp+'#lightOff').classList.remove("pure-button-active");
+    //     })
+    // });
+
+    getJSON("/gs"+qsp[8],
+        function(GS){
+            for(k in GS){
+                if(k=='liveData') parseLiveData(GS[k]);
+                else if((e = $(qsp+'#'+k)) != undefined) e.innerHTML = GS[k];
+            }
+            fadeOut($(qsp+"#l"));
         },
         function(){
-            $(qsp+'#l').innerHTML='<h4 style="display:inline;color:red;"><b> Failed</b></h4>';
+            $(qsp+"#l").innerHTML='<h4 style="display:inline;color:red;"><b> Failed</b></h4>';
         }
     );
+
+    if (!!window.EventSource) {
+        var statusEventSource = new EventSource('/statusEvt'+qsp[8]);
+        statusEventSource.addEventListener('message', function(e) {
+            console.log('statusEvt'+qsp[8]+' : '+e.data);
+            parseLiveData(JSON.parse(e.data));
+            $(qsp+'#lastRefresh').innerText=' ('+(new Date()).toLocaleString()+')';
+        });
+    }
 </script>

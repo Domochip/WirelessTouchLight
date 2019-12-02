@@ -15,7 +15,7 @@
 #define DEFAULT_AP_PSK "PasswordTouchLight"
 
 //Enable status webpage EventSource
-#define ENABLE_STATUS_EVENTSOURCE 0
+#define ENABLE_STATUS_EVENTSOURCE 1
 
 //Enable developper mode (SPIFFS editor)
 #define DEVELOPPER_MODE 0

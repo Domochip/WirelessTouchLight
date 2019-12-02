@@ -249,9 +249,13 @@ String TouchLight::generateStatusJSON()
 {
   String gs('{');
 
-  gs = gs + F("\"lightState\":") + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0);
+  gs = gs + F("\"liveData\":{");
 
-  gs = gs + F(",\"lcsr\":") + _lastCapaSensorResult;
+  gs = gs + F("\"Light State\":") + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0);
+
+  gs = gs + F(",\"Last Capacitive Sensor Result\":") + _lastCapaSensorResult;
+
+  gs = gs + '}';
 
   gs = gs + F(",\"has1\":\"");
   switch (_ha.protocol)
