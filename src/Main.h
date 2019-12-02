@@ -29,7 +29,7 @@
 //#define RESCUE_BTN_PIN 2
 
 //Define time to wait for Rescue press (in s)
-//#define RESCUE_BUTTON_WAIT 3
+#define RESCUE_BUTTON_WAIT 0
 
 //Status LED
 //#define STATUS_LED_SETUP pinMode(XX, OUTPUT);pinMode(XX, OUTPUT);
