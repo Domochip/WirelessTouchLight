@@ -411,15 +411,16 @@ void TouchLight::appInitWebServer(AsyncWebServer &server, bool &shouldReboot, bo
 //Run for timer
 void TouchLight::appRun()
 {
+
+  //measure
+  _lastCapaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
+
+  //DEBUG
+  //LOG_SERIAL.println(_lastCapaSensorResult);
+
   //if touch latency is over
   if (millis() > (_lastTouchMillis + TOUCH_LATENCY))
   {
-    //measure
-    _lastCapaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
-
-    //DEBUG
-    //LOG_SERIAL.println(_lastCapaSensorResult);
-
     //compare last measure with threshold
     if (_lastCapaSensorResult > _capaSensorThreshold)
     {
