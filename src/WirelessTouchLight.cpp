@@ -6,6 +6,8 @@ void TouchLight::on()
   //yes if ligth is off
   if (!digitalRead(RELAY_GPIO))
   {
+    _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
+
     //apply change to output
     digitalWrite(RELAY_GPIO, HIGH);
 
@@ -21,6 +23,9 @@ void TouchLight::on()
     _eventsList[myEventPos].lightOn = true;
     _eventsList[myEventPos].sent = false;
     _eventsList[myEventPos].retryLeft = MAX_RETRY_NUMBER;
+
+    //Send value to Web clients through EventSource
+    _statusEventSource.send(String(F("{\"Light State\":1}")).c_str());
   }
 }
 void TouchLight::off()
@@ -29,6 +34,8 @@ void TouchLight::off()
   //yes if ligth is on
   if (digitalRead(RELAY_GPIO))
   {
+    _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
+
     //apply change to output
     digitalWrite(RELAY_GPIO, LOW);
 
@@ -44,10 +51,15 @@ void TouchLight::off()
     _eventsList[myEventPos].lightOn = false;
     _eventsList[myEventPos].sent = false;
     _eventsList[myEventPos].retryLeft = MAX_RETRY_NUMBER;
+
+    //Send value to Web clients through EventSource
+    _statusEventSource.send(String(F("{\"Light State\":0}")).c_str());
   }
 }
 void TouchLight::toggle()
 {
+  _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
+
   //invert output
   digitalWrite(RELAY_GPIO, digitalRead(RELAY_GPIO) == HIGH ? LOW : HIGH);
 
@@ -63,6 +75,9 @@ void TouchLight::toggle()
   _eventsList[myEventPos].lightOn = (digitalRead(RELAY_GPIO) == HIGH);
   _eventsList[myEventPos].sent = false;
   _eventsList[myEventPos].retryLeft = MAX_RETRY_NUMBER;
+
+  //Send value to Web clients through EventSource
+  _statusEventSource.send((String(F("{\"Light State\":")) + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0) + '}').c_str());
 }
 
 //------------------------------------------
@@ -102,16 +117,13 @@ void TouchLight::mqttCallback(char *topic, uint8_t *payload, unsigned int length
   switch (payload[0])
   {
   case '0':
-    _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     off();
     break;
   case '1':
-    _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     on();
     break;
   case 't':
   case 'T':
-    _lastTouchMillis = millis(); //set last touch to now to prevent interference during TOUCH_LATENCY
     toggle();
     break;
   }
