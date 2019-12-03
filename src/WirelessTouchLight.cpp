@@ -154,6 +154,8 @@ void TouchLight::parseConfigJSON(DynamicJsonDocument &doc)
     _samplesNumberOff = doc[F("samplesNumberOff")];
   if (!doc[F("samplesNumberOn")].isNull())
     _samplesNumberOn = doc[F("samplesNumberOn")];
+  if (!doc[F("threshold")].isNull())
+    _capaSensorThreshold = doc[F("threshold")];
 
   if (!doc[F("haproto")].isNull())
     _ha.protocol = doc[F("haproto")];
@@ -180,6 +182,8 @@ bool TouchLight::parseConfigWebRequest(AsyncWebServerRequest *request)
     _samplesNumberOff = request->getParam(F("samplesNumberOff"), true)->value().toInt();
   if (request->hasParam(F("samplesNumberOn"), true))
     _samplesNumberOn = request->getParam(F("samplesNumberOn"), true)->value().toInt();
+  if (request->hasParam(F("threshold"), true))
+    _capaSensorThreshold = request->getParam(F("threshold"), true)->value().toInt();
 
   //Parse HA protocol
   if (request->hasParam(F("haproto"), true))
@@ -233,6 +237,7 @@ String TouchLight::generateConfigJSON(bool forSaveFile = false)
 
   gc = gc + F("\"samplesNumberOff\":") + _samplesNumberOff;
   gc = gc + F(",\"samplesNumberOn\":") + _samplesNumberOn;
+  gc = gc + F(",\"threshold\":") + _capaSensorThreshold;
 
   gc = gc + F(",\"haproto\":") + _ha.protocol;
   gc = gc + F(",\"hahost\":\"") + _ha.hostname + '"';
