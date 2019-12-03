@@ -440,7 +440,6 @@ void TouchLight::appRun()
     //compare last measure with threshold
     if (_lastCapaSensorResult > _capaSensorThreshold)
     {
-      _lastTouchMillis = millis();
       toggle();
     }
   }
