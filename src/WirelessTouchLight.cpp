@@ -362,7 +362,7 @@ bool TouchLight::appInit(bool reInit)
 
     _capaSensor = new CapacitiveSensor(SEND_GPIO, RECEIVE_GPIO);
 
-    _publishTicker.attach(1, [this]() { _statusEventSource.send((String(F("{\"_lastCapaSensorResult\":")) + _lastCapaSensorResult + '}').c_str()); });
+    _publishTicker.attach(1, [this]() { _statusEventSource.send((String(F("{\"Last Capacitive Sensor Result\":")) + _lastCapaSensorResult + '}').c_str()); });
   }
 
   return true;
@@ -447,7 +447,7 @@ void TouchLight::appRun()
     }
 
     if (positiveCount > 3)
-      _statusEventSource.send((String(F("{\"_lastCapaSensorResult\":")) + _lastCapaSensorResult + F(",\"positiveCount\":") + positiveCount + '}').c_str());
+      _statusEventSource.send((String(F("{\"Last Capacitive Sensor Result\":")) + _lastCapaSensorResult + F(",\"positiveCount\":") + positiveCount + '}').c_str());
 
     //if we got 5 positive
     if (positiveCount == 5)
