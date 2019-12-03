@@ -65,7 +65,7 @@ private:
     MQTT mqtt;
   } HomeAutomation;
 
-  CapacitiveSensor *_capaSensor;
+  //CapacitiveSensor *_capaSensor;
   uint8_t _samplesNumberOff = 10;
   uint8_t _samplesNumberOn = 10;
   long _capaSensorThreshold = 15000;
