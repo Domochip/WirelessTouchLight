@@ -428,20 +428,28 @@ void TouchLight::appInitWebServer(AsyncWebServer &server, bool &shouldReboot, bo
 void TouchLight::appRun()
 {
 
-  //measure
-  _lastCapaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
-
-  //DEBUG
-  //LOG_SERIAL.println(_lastCapaSensorResult);
-
   //if touch latency is over
   if (millis() > (_lastTouchMillis + TOUCH_LATENCY))
   {
-    //compare last measure with threshold
-    if (_lastCapaSensorResult > _capaSensorThreshold)
+    byte positiveCount = 0;
+    for (positiveCount = 0; positiveCount < 5; ++positiveCount)
     {
-      toggle();
+      //measure
+      _lastCapaSensorResult = _capaSensor->capacitiveSensorRaw((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
+
+      //compare last measure with threshold
+      if (_lastCapaSensorResult < _capaSensorThreshold)
+        break;
+
+      delayMicroseconds(500);
     }
+
+    if (positiveCount > 3)
+      _statusEventSource.send((String(F("{\"_lastCapaSensorResult\":")) + _lastCapaSensorResult + F(",\"positiveCount\":") + positiveCount + '}').c_str());
+
+    //if we got 5 positive
+    if (positiveCount == 5)
+      toggle();
   }
 
   if (_ha.protocol == HA_PROTO_MQTT)
