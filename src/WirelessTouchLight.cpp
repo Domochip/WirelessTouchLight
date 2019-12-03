@@ -443,14 +443,19 @@ void TouchLight::appRun()
   if (millis() > (_lastTouchMillis + TOUCH_LATENCY))
   {
     byte positiveCount = 0;
-    for (positiveCount = 0; positiveCount < 5; ++positiveCount)
+    long previousResult = 0;
+
+    unsigned long startMillis = millis();
+    for (positiveCount = 0; positiveCount < 2; ++positiveCount)
     {
       //measure
       //_lastCapaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
 
+      previousResult = _lastCapaSensorResult;
       _lastCapaSensorResult = 0;
 
       delayMicroseconds(500);
+
       pinMode(RECEIVE_GPIO, INPUT);
       while (digitalRead(RECEIVE_GPIO) != HIGH)
         ++_lastCapaSensorResult;
@@ -463,11 +468,15 @@ void TouchLight::appRun()
         break;
     }
 
-    if (positiveCount > 3)
+    if (positiveCount > 0)
+    {
+      _statusEventSource.send((String(F("{\"duration\":")) + (millis() - startMillis) + '}').c_str());
+      _statusEventSource.send((String(F("{\"Previous Sensor Result\":")) + previousResult + '}').c_str());
       _statusEventSource.send((String(F("{\"Last Capacitive Sensor Result\":")) + _lastCapaSensorResult + F(",\"positiveCount\":") + positiveCount + '}').c_str());
+    }
 
     //if we got 5 positive
-    if (positiveCount == 5)
+    if (positiveCount == 2)
       toggle();
   }
 
