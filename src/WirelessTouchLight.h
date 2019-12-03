@@ -79,6 +79,7 @@ private:
   int _haSendResult = 1;
   WiFiClient _wifiClient;
 
+  Ticker _publishTicker;
   MQTTMan _mqttMan;
 
   void on();

@@ -361,6 +361,8 @@ bool TouchLight::appInit(bool reInit)
     pinMode(RELAY_GPIO, OUTPUT);
 
     _capaSensor = new CapacitiveSensor(SEND_GPIO, RECEIVE_GPIO);
+
+    _publishTicker.attach(1, [this]() { _statusEventSource.send((String(F("{\"_lastCapaSensorResult\":")) + _lastCapaSensorResult + '}').c_str()); });
   }
 
   return true;
