@@ -368,8 +368,7 @@ bool TouchLight::appInit(bool reInit)
     //_capaSensor = new CapacitiveSensor(SEND_GPIO, RECEIVE_GPIO);
     pinMode(SEND_GPIO, OUTPUT);
     digitalWrite(SEND_GPIO, HIGH);
-    pinMode(RECEIVE_GPIO, OUTPUT);
-    digitalWrite(RECEIVE_GPIO, LOW);
+    pinMode(RECEIVE_GPIO, INPUT);
 
     _publishTicker.attach(1, [this]() { _statusEventSource.send((String(F("{\"Last Capacitive Sensor Result\":")) + _lastCapaSensorResult + '}').c_str()); });
   }
@@ -446,22 +445,21 @@ void TouchLight::appRun()
     long previousResult = 0;
 
     unsigned long startMillis = millis();
-    for (positiveCount = 0; positiveCount < 2; ++positiveCount)
+    for (positiveCount = 0; positiveCount < 1; ++positiveCount)
     {
-      //measure
-      //_lastCapaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
 
       previousResult = _lastCapaSensorResult;
       _lastCapaSensorResult = 0;
 
       delayMicroseconds(500);
 
-      pinMode(RECEIVE_GPIO, INPUT);
+      //measure
+      //_lastCapaSensorResult = _capaSensor->capacitiveSensorRaw((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
+
+      digitalWrite(SEND_GPIO, HIGH);
       while (digitalRead(RECEIVE_GPIO) != HIGH)
         ++_lastCapaSensorResult;
-
-      pinMode(RECEIVE_GPIO, OUTPUT);
-      digitalWrite(RECEIVE_GPIO, LOW);
+      digitalWrite(SEND_GPIO, LOW);
 
       //compare last measure with threshold
       if (_lastCapaSensorResult < _capaSensorThreshold)
@@ -476,7 +474,7 @@ void TouchLight::appRun()
     }
 
     //if we got 5 positive
-    if (positiveCount == 2)
+    if (positiveCount == 1)
       toggle();
   }
 
