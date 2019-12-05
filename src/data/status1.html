@@ -3,11 +3,15 @@
 
 <h2 class="content-subhead">Wireless Touch Light<span id="l"><h6 style="display:inline"><b> Loading...</b></h6></span></h2>
 <h3 class="content-subhead">Light Infos (<span id="lastRefresh">AutoRefresh</span>)</h3>
-<dl id="liveData"></dl>
-<div id="LightOnOff" class="pure-button-group" role="group" style="display: none;"><style scoped>.pure-button-active{background: rgb(31, 141, 214);}</style>
-    <button id="LightOff" class="pure-button">OFF</button>
-    <button id="LightOn" class="pure-button">ON</button>
-</div>
+<dl id="liveData">
+    <dd id="ls">
+        <input type="hidden" id="lsValue">
+        <div class="pure-button-group" role="group"><style scoped>.pure-button-active{background: rgb(31, 141, 214);}</style>
+            <button id="lsOff" class="pure-button">OFF</button>
+            <button id="lsOn" class="pure-button">ON</button>
+        </div>
+    </dd>
+</dl>
 <h3 class="content-subhead">Home Automation Status</h3>
 <span id="has1"></span><br>
 <span id="has2"></span>
@@ -15,6 +19,21 @@
 <script>
     //QuerySelector Prefix is added by load function to know into what element queySelector need to look for
     //var qsp = '#content1 ';
+
+    function displayCurrentLightState(kForId,newValue){
+        if(newValue==0) $(qsp+"#"+kForId+"Off").classList.add("pure-button-active"); else $(qsp+"#"+kForId+"Off").classList.remove("pure-button-active");
+        if(newValue==1) $(qsp+"#"+kForId+"On").classList.add("pure-button-active"); else $(qsp+"#"+kForId+"On").classList.remove("pure-button-active");
+    }
+
+    $(qsp+'#lsValue').addEventListener('change',function(evt){displayCurrentLightState(evt.srcElement.id.replace('Value',''),evt.srcElement.val)});
+
+    $(qsp+"#lsOff").addEventListener('click',function(evt){
+        get('/setOFF');
+    });
+
+    $(qsp+"#lsOn").addEventListener('click',function(evt){
+        get('/setON');
+    });
 
     function parseLiveData(liveData){
         if($(qsp+'#liveData') == undefined) return;
@@ -50,20 +69,6 @@
             $(qsp+'#lastRefresh').innerText=(new Date()).toLocaleString();
         }
     }
-
-    // $(qsp+"#LightOff").addEventListener('click',function(evt){
-    //     get('/setOFF',function(){
-    //             $(qsp+'#lightOff').classList.add("pure-button-active");
-    //             $(qsp+'#LightOn').classList.remove("pure-button-active");
-    //     })
-    // });
-
-    // $(qsp+"#LightOn").addEventListener('click',function(evt){
-    //     get('/setON',function(){
-    //             $(qsp+'#LightOn').classList.add("pure-button-active");
-    //             $(qsp+'#lightOff').classList.remove("pure-button-active");
-    //     })
-    // });
 
     getJSON("/gs"+qsp[8],
         function(GS){

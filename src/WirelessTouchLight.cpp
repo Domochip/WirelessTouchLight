@@ -25,7 +25,7 @@ void TouchLight::on()
     _eventsList[myEventPos].retryLeft = MAX_RETRY_NUMBER;
 
     //Send value to Web clients through EventSource
-    _statusEventSource.send(String(F("{\"Light State\":1}")).c_str());
+    _statusEventSource.send(String(F("{\"ls\":1}")).c_str());
   }
 }
 void TouchLight::off()
@@ -53,7 +53,7 @@ void TouchLight::off()
     _eventsList[myEventPos].retryLeft = MAX_RETRY_NUMBER;
 
     //Send value to Web clients through EventSource
-    _statusEventSource.send(String(F("{\"Light State\":0}")).c_str());
+    _statusEventSource.send(String(F("{\"ls\":0}")).c_str());
   }
 }
 void TouchLight::toggle()
@@ -77,7 +77,7 @@ void TouchLight::toggle()
   _eventsList[myEventPos].retryLeft = MAX_RETRY_NUMBER;
 
   //Send value to Web clients through EventSource
-  _statusEventSource.send((String(F("{\"Light State\":")) + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0) + '}').c_str());
+  _statusEventSource.send((String(F("{\"ls\":")) + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0) + '}').c_str());
 }
 
 //------------------------------------------
@@ -268,7 +268,7 @@ String TouchLight::generateStatusJSON()
 
   gs = gs + F("\"liveData\":{");
 
-  gs = gs + F("\"Light State\":") + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0);
+  gs = gs + F("\"ls\":") + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0);
 
   gs = gs + F(",\"Last Capacitive Sensor Result\":") + _lastCapaSensorResult;
 
