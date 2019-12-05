@@ -2,7 +2,7 @@
 <div id="shortApplicationName" style="display: none;">WTouch</div>
 
 <h2 class="content-subhead">Wireless Touch Light<span id="l"><h6 style="display:inline"><b> Loading...</b></h6></span></h2>
-<h3 class="content-subhead">Light Infos<span id="lastRefresh"> (AutoRefresh)</span></h3>
+<h3 class="content-subhead">Light Infos (<span id="lastRefresh">AutoRefresh</span>)</h3>
 <dl id="liveData"></dl>
 <div id="LightOnOff" class="pure-button-group" role="group" style="display: none;"><style scoped>.pure-button-active{background: rgb(31, 141, 214);}</style>
     <button id="LightOff" class="pure-button">OFF</button>
@@ -17,6 +17,7 @@
     //var qsp = '#content1 ';
 
     function parseLiveData(liveData){
+        if($(qsp+'#liveData') == undefined) return;
         for(k in liveData){
             kForId=(/[^a-zA-Z]/.test(k[0]) ? 'a' : '')+k; //k[0] is not in a-zA-Z then we need to add 'a'
             kForId=kForId.replace(/ /g,'_');
@@ -38,12 +39,15 @@
                     }
                 }
             }
-            else if($(qsp+'#liveData') != undefined){
+            else{
                 var newElement = document.createElement("dd");
                 newElement.id=kForId;
                 newElement.innerHTML=k+' : <span id="'+kForId+'Value">'+liveData[k]+'</span>';
                 $(qsp+'#liveData').appendChild(newElement);
             }
+        }
+        if($(qsp+'#lastRefresh') != undefined){
+            $(qsp+'#lastRefresh').innerText=(new Date()).toLocaleString();
         }
     }
 
@@ -79,9 +83,6 @@
         statusEventSource.addEventListener('message', function(e) {
             console.log('statusEvt'+qsp[8]+' : '+e.data);
             parseLiveData(JSON.parse(e.data));
-            if($(qsp+'#lastRefresh') != undefined){
-                $(qsp+'#lastRefresh').innerText=' ('+(new Date()).toLocaleString()+')';
-            }
         });
     }
 </script>
