@@ -439,12 +439,12 @@ void TouchLight::appRun()
   if (millis() > (_lastTouchMillis + TOUCH_LATENCY))
   {
     byte positiveCount = 0;
-    long previousResult = 0;
+    //long previousResult = 0;
 
     unsigned long startMillis = 0;
     for (positiveCount = 0; positiveCount < 1; ++positiveCount)
     {
-      previousResult = _lastCapaSensorResult;
+      //previousResult = _lastCapaSensorResult;
       _lastCapaSensorResult = 0;
 
       if (!positiveCount)
@@ -462,7 +462,7 @@ void TouchLight::appRun()
 
     if (positiveCount > 0)
     {
-      _statusEventSource.send((String(F("{\"Last Capacitive Sensor Result\":")) + _lastCapaSensorResult + F(",\"Previous Sensor Result\":") + previousResult + F(",\"duration\":") + (millis() - startMillis) + F(",\"positiveCount\":") + positiveCount + '}').c_str());
+      _statusEventSource.send((String(F("{\"Last Capacitive Sensor Result\":")) + _lastCapaSensorResult /*+ F(",\"Previous Sensor Result\":") + previousResult*/ + F(",\"duration\":") + (millis() - startMillis) /*+ F(",\"positiveCount\":") + positiveCount */+ '}').c_str());
     }
 
     //if we got 1 positive
