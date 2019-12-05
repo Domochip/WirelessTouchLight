@@ -69,7 +69,7 @@ private:
   uint8_t _samplesNumberOff = 127;
   uint8_t _samplesNumberOn = 127;
   long _capaSensorThreshold = 3500;
-  long _lastCapaSensorResult = 0;
+  long _lastHigherCapaSensorResult = 0;
   unsigned long _lastTouchMillis = 0;
 
   Event _eventsList[NUMBER_OF_EVENTS];

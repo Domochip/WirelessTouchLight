@@ -270,7 +270,7 @@ String TouchLight::generateStatusJSON()
 
   gs = gs + F("\"ls\":") + (digitalRead(RELAY_GPIO) == HIGH ? 1 : 0);
 
-  gs = gs + F(",\"Last Capacitive Sensor Result\":") + _lastCapaSensorResult;
+  gs = gs + F(",\"Last Higher Capacitive Sensor Result\":") + _lastHigherCapaSensorResult;
 
   gs = gs + '}';
 
@@ -367,7 +367,12 @@ bool TouchLight::appInit(bool reInit)
 
     _capaSensor = new CapacitiveSensor(SEND_GPIO, RECEIVE_GPIO);
 
-    _publishTicker.attach(1, [this]() { _statusEventSource.send((String(F("{\"Last Capacitive Sensor Result\":")) + _lastCapaSensorResult + '}').c_str()); });
+    _publishTicker.attach(1, [this]() {
+      //if touch latency is over
+      if (millis() > (_lastTouchMillis + TOUCH_LATENCY))
+        _statusEventSource.send((String(F("{\"Last Higher Capacitive Sensor Result\":")) + _lastHigherCapaSensorResult + '}').c_str());
+      _lastHigherCapaSensorResult = 0;
+    });
   }
 
   return true;
@@ -439,13 +444,13 @@ void TouchLight::appRun()
   if (millis() > (_lastTouchMillis + TOUCH_LATENCY))
   {
     byte positiveCount = 0;
+    long capaSensorResult = 0;
     //long previousResult = 0;
 
     unsigned long startMillis = 0;
     for (positiveCount = 0; positiveCount < 1; ++positiveCount)
     {
-      //previousResult = _lastCapaSensorResult;
-      _lastCapaSensorResult = 0;
+      //previousResult = capaSensorResult;
 
       if (!positiveCount)
         startMillis = millis();
@@ -453,16 +458,20 @@ void TouchLight::appRun()
       delayMicroseconds(500);
 
       //measure
-      _lastCapaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
+      capaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
+
+      //save Higher result
+      if (_lastHigherCapaSensorResult < capaSensorResult)
+        _lastHigherCapaSensorResult = capaSensorResult;
 
       //compare last measure with threshold
-      if (_lastCapaSensorResult < _capaSensorThreshold)
+      if (capaSensorResult < _capaSensorThreshold)
         break;
     }
 
     if (positiveCount > 0)
     {
-      _statusEventSource.send((String(F("{\"Last Capacitive Sensor Result\":")) + _lastCapaSensorResult /*+ F(",\"Previous Sensor Result\":") + previousResult*/ + F(",\"duration\":") + (millis() - startMillis) /*+ F(",\"positiveCount\":") + positiveCount */+ '}').c_str());
+      _statusEventSource.send((String(F("{\"Capacitive Sensor Result\":")) + capaSensorResult /*+ F(",\"Previous Sensor Result\":") + previousResult*/ + F(",\"Measure Duration\":") + (millis() - startMillis) /*+ F(",\"positiveCount\":") + positiveCount */ + '}').c_str());
     }
 
     //if we got 1 positive
