@@ -66,9 +66,9 @@ private:
   } HomeAutomation;
 
   CapacitiveSensor *_capaSensor;
-  uint8_t _samplesNumberOff = 127;
-  uint8_t _samplesNumberOn = 127;
-  long _capaSensorThreshold = 3500;
+  uint8_t _samplesNumber = 127;
+  long _capaSensorThresholdOn = 3500;
+  long _capaSensorThresholdOff = 3500;
   long _lastHigherCapaSensorResult = 0;
   unsigned long _lastTouchMillis = 0;
 

@@ -133,9 +133,9 @@ void TouchLight::mqttCallback(char *topic, uint8_t *payload, unsigned int length
 //Used to initialize configuration properties to default values
 void TouchLight::setConfigDefaultValues()
 {
-  _samplesNumberOff = 127;
-  _samplesNumberOn = 127;
-  _capaSensorThreshold = 3500;
+  _samplesNumber = 127;
+  _capaSensorThresholdOn = 3500;
+  _capaSensorThresholdOff = 3500;
 
   _ha.protocol = HA_PROTO_DISABLED;
   _ha.hostname[0] = 0;
@@ -150,12 +150,12 @@ void TouchLight::setConfigDefaultValues()
 //Parse JSON object into configuration properties
 void TouchLight::parseConfigJSON(DynamicJsonDocument &doc)
 {
-  if (!doc[F("samplesNumberOff")].isNull())
-    _samplesNumberOff = doc[F("samplesNumberOff")];
-  if (!doc[F("samplesNumberOn")].isNull())
-    _samplesNumberOn = doc[F("samplesNumberOn")];
-  if (!doc[F("threshold")].isNull())
-    _capaSensorThreshold = doc[F("threshold")];
+  if (!doc[F("samplesNumber")].isNull())
+    _samplesNumber = doc[F("samplesNumber")];
+  if (!doc[F("thresholdOn")].isNull())
+    _capaSensorThresholdOn = doc[F("thresholdOn")];
+  if (!doc[F("thresholdOff")].isNull())
+    _capaSensorThresholdOff = doc[F("thresholdOff")];
 
   if (!doc[F("haproto")].isNull())
     _ha.protocol = doc[F("haproto")];
@@ -178,12 +178,12 @@ void TouchLight::parseConfigJSON(DynamicJsonDocument &doc)
 //Parse HTTP POST parameters in request into configuration properties
 bool TouchLight::parseConfigWebRequest(AsyncWebServerRequest *request)
 {
-  if (request->hasParam(F("samplesNumberOff"), true))
-    _samplesNumberOff = request->getParam(F("samplesNumberOff"), true)->value().toInt();
-  if (request->hasParam(F("samplesNumberOn"), true))
-    _samplesNumberOn = request->getParam(F("samplesNumberOn"), true)->value().toInt();
-  if (request->hasParam(F("threshold"), true))
-    _capaSensorThreshold = request->getParam(F("threshold"), true)->value().toInt();
+  if (request->hasParam(F("samplesNumber"), true))
+    _samplesNumber = request->getParam(F("samplesNumber"), true)->value().toInt();
+  if (request->hasParam(F("thresholdOn"), true))
+    _capaSensorThresholdOn = request->getParam(F("thresholdOn"), true)->value().toInt();
+  if (request->hasParam(F("thresholdOff"), true))
+    _capaSensorThresholdOff = request->getParam(F("thresholdOff"), true)->value().toInt();
 
   //Parse HA protocol
   if (request->hasParam(F("haproto"), true))
@@ -235,9 +235,9 @@ String TouchLight::generateConfigJSON(bool forSaveFile = false)
 {
   String gc('{');
 
-  gc = gc + F("\"samplesNumberOff\":") + _samplesNumberOff;
-  gc = gc + F(",\"samplesNumberOn\":") + _samplesNumberOn;
-  gc = gc + F(",\"threshold\":") + _capaSensorThreshold;
+  gc = gc + F("\"samplesNumber\":") + _samplesNumber;
+  gc = gc + F(",\"thresholdOn\":") + _capaSensorThresholdOn;
+  gc = gc + F(",\"thresholdOff\":") + _capaSensorThresholdOff;
 
   gc = gc + F(",\"haproto\":") + _ha.protocol;
   gc = gc + F(",\"hahost\":\"") + _ha.hostname + '"';
@@ -458,14 +458,14 @@ void TouchLight::appRun()
       delayMicroseconds(500);
 
       //measure
-      capaSensorResult = _capaSensor->capacitiveSensor((digitalRead(RELAY_GPIO) == HIGH ? _samplesNumberOn : _samplesNumberOff));
+      capaSensorResult = _capaSensor->capacitiveSensor(_samplesNumber);
 
       //save Higher result
       if (_lastHigherCapaSensorResult < capaSensorResult)
         _lastHigherCapaSensorResult = capaSensorResult;
 
       //compare last measure with threshold
-      if (capaSensorResult < _capaSensorThreshold)
+      if (capaSensorResult < (digitalRead(RELAY_GPIO) == HIGH ? _capaSensorThresholdOn : _capaSensorThresholdOff))
         break;
     }
 
