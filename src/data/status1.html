@@ -38,7 +38,7 @@
                     }
                 }
             }
-            else{
+            else if($(qsp+'#liveData') != undefined){
                 var newElement = document.createElement("dd");
                 newElement.id=kForId;
                 newElement.innerHTML=k+' : <span id="'+kForId+'Value">'+liveData[k]+'</span>';
@@ -79,7 +79,9 @@
         statusEventSource.addEventListener('message', function(e) {
             console.log('statusEvt'+qsp[8]+' : '+e.data);
             parseLiveData(JSON.parse(e.data));
-            $(qsp+'#lastRefresh').innerText=' ('+(new Date()).toLocaleString()+')';
+            if($(qsp+'#lastRefresh') != undefined){
+                $(qsp+'#lastRefresh').innerText=' ('+(new Date()).toLocaleString()+')';
+            }
         });
     }
 </script>
